@@ -299,10 +299,17 @@
       document.getElementById('m-g-tri').textContent = data['Grasa Tricep'] || '-';
       document.getElementById('m-g-abd').textContent = data['Grasa Abdominal'] || '-';
     }
-    if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js');
+    
 }
   </script>
-  
+  <script>
+      if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((reg) => console.log('Service Worker registrado con éxito:', reg.scope))
+          .catch((err) => console.error('Error al registrar Service Worker:', err));
+      });
+    }
+  </script>
 </body>
 </html>
