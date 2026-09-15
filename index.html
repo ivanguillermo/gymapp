@@ -87,11 +87,6 @@
       background-color: #e03e6e;
     }
 
-    .badge-green {
-      color: var(--primary-green);
-      font-weight: bold;
-    }
-
     .metrics-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -193,7 +188,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-    // Reemplaza esto con tu configuración de Firebase Console
     const firebaseConfig = {
         apiKey: "AIzaSyDSNvI2PkCVkr-J3yjXy2T8rkbjujj-9AY",
         authDomain: "gymapp-4d679.firebaseapp.com",
@@ -207,12 +201,11 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    // Enlace público CSV exportado de Google Sheets
     const SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIWPk8cl4-Tr6lJylnL-TPvEcWgfIdRW3ktWr6LlOfWO0fDhFcnkwFzkbVl0GBoUzgYFAhJFps6q9D/pub?output=csv';
 
     let historialUsuario = [];
 
-    // Login Event
+    // Evento Login
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = document.getElementById('email').value.trim();
@@ -227,13 +220,11 @@
 
     document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
 
-    // Escuchador del Estado de Autenticación
+    // Escuchador de Autenticación
     onAuthStateChanged(auth, (user) => {
       if (user) {
         document.getElementById('auth-section').style.display = 'none';
         document.getElementById('dashboard-section').style.display = 'block';
-        
-        // Cargar los datos desde Google Sheets vía PapaParse
         cargarDatosDesdeSheets(user.email);
       } else {
         document.getElementById('auth-section').style.display = 'block';
@@ -241,7 +232,7 @@
       }
     });
 
-    // Función principal: Usa PapaParse para parsear el Sheets CSV
+    // Cargar datos del Sheets
     function cargarDatosDesdeSheets(userEmail) {
       Papa.parse(SHEETS_CSV_URL, {
         download: true,
@@ -250,45 +241,43 @@
         complete: function(results) {
           const data = results.data;
           
-          // Filtrar las filas por el correo del usuario logueado
-          historialUsuario = data.filter(row => row['Correo'] && row['Correo'].toLowerCase() === userEmail.toLowerCase());
+          historialUsuario = data.filter(row => row['Correo'] && row['Correo'].trim().toLowerCase() === userEmail.toLowerCase());
 
           if (historialUsuario.length === 0) {
             alert("No se encontraron mediciones registradas para este correo.");
             return;
           }
 
-          // Ordenar las mediciones por la fecha más reciente primero
-          historialUsuario.sort((a, b) => new Date(b['Fecha Medicion']) - new Date(a['Fecha Medicion']));
+          // Ordenar por fecha más reciente (Soporta columna 'Fecha Medicion Peso' o 'Fecha Medicion')
+          historialUsuario.sort((a, b) => {
+            const fechaA = new Date(a['Fecha Medicion Peso'] || a['Fecha Medicion']);
+            const fechaB = new Date(b['Fecha Medicion Peso'] || b['Fecha Medicion']);
+            return fechaB - fechaA;
+          });
 
-          // Mostrar Nombre en el saludo
           const primerRegistro = historialUsuario[0];
           document.getElementById('user-greeting').textContent = `¡Hola, ${primerRegistro['Nombres']}!`;
 
-          // Poblar el Selector de Fechas
           const selectFecha = document.getElementById('fecha-select');
           selectFecha.innerHTML = '';
 
           historialUsuario.forEach((medicion, idx) => {
             const opt = document.createElement('option');
-            opt.value = idx; // Guardamos el índice
-            opt.textContent = medicion['Fecha Medicion'];
+            opt.value = idx;
+            opt.textContent = medicion['Fecha Medicion Peso'] || medicion['Fecha Medicion'];
             selectFecha.appendChild(opt);
           });
 
-          // Renderizar por defecto la medición más reciente (índice 0)
           renderizarMedicion(historialUsuario[0]);
         }
       });
     }
 
-    // Cambiar datos al seleccionar otra fecha del dropdown
     document.getElementById('fecha-select').addEventListener('change', (e) => {
       const idx = e.target.value;
       renderizarMedicion(historialUsuario[idx]);
     });
 
-    // Pinta la información de las columnas de tu hoja
     function renderizarMedicion(data) {
       document.getElementById('m-peso').textContent = data['Peso'] || '-';
       document.getElementById('m-cuello').textContent = data['Cuello'] || '-';
@@ -299,11 +288,10 @@
       document.getElementById('m-g-tri').textContent = data['Grasa Tricep'] || '-';
       document.getElementById('m-g-abd').textContent = data['Grasa Abdominal'] || '-';
     }
-    
-}
   </script>
+
   <script>
-      if ('serviceWorker' in navigator) {
+    if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
           .then((reg) => console.log('Service Worker registrado con éxito:', reg.scope))
