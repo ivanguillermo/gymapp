@@ -298,6 +298,10 @@
       document.getElementById('m-g-tri').textContent = data['Grasa Tricep'] || '-';
       document.getElementById('m-g-abd').textContent = data['Grasa Abdominal'] || '-';
     }
+    if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
+}
   </script>
+  
 </body>
 </html>
