@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gym Metrics PWA</title>
+  <link rel="manifest" href="manifest.json">
+  <!-- PapaParse para procesar CSV / Sheets -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+  <style>
+    :root {
+      --primary-green: #2ecc71;
+      --accent-pink: #ff477e;
+      --bg-dark: #121212;
+      --card-bg: #1e1e1e;
+      --text-light: #f5f5f5;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 450px;
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      border: 1px solid #333;
+    }
+
+    h1, h2 {
+      text-align: center;
+      color: var(--primary-green);
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 0.9em;
+      color: #aaa;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #444;
+      background-color: #2a2a2a;
+      color: #fff;
+      box-sizing: border-box;
+      font-size: 1rem;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent-pink);
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background-color: var(--accent-pink);
+      color: white;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #e03e6e;
+    }
+
+    .badge-green {
+      color: var(--primary-green);
+      font-weight: bold;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    .metric-card {
+      background: #282828;
+      padding: 12px;
+      border-radius: 8px;
+      border-left: 4px solid var(--primary-green);
+    }
+
+    .metric-card.pink {
+      border-left-color: var(--accent-pink);
+    }
+
+    .metric-title {
+      font-size: 0.8em;
+      color: #aaa;
+    }
+
+    .metric-value {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-top: 4px;
+    }
+
+    .logout-btn {
+      background: transparent;
+      border: 1px solid var(--accent-pink);
+      color: var(--accent-pink);
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Vista 1: Login -->
+    <div id="auth-section">
+      <h1>Gym Tracker</h1>
+      <form id="login-form">
+        <div class="form-group">
+          <label>Correo Electrónico</label>
+          <input type="email" id="email" required placeholder="tu@correo.com">
+        </div>
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input type="password" id="password" required placeholder="******">
+        </div>
+        <button type="submit">Iniciar Sesión</button>
+      </form>
+    </div>
+
+    <!-- Vista 2: Dashboard del Usuario -->
+    <div id="dashboard-section" style="display:none;">
+      <h2 id="user-greeting">¡Hola!</h2>
+      
+      <div class="form-group">
+        <label for="fecha-select">Seleccionar Fecha de Medición:</label>
+        <select id="fecha-select"></select>
+      </div>
+
+      <!-- Tarjetas de Métricas -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-title">Peso</div>
+          <div class="metric-value"><span id="m-peso">-</span> kg</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">Cuello</div>
+          <div class="metric-value"><span id="m-cuello">-</span> cm</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">Brazo Der / Izq</div>
+          <div class="metric-value"><span id="m-b-der">-</span> / <span id="m-b-izq">-</span> cm</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">Muslo Der / Izq</div>
+          <div class="metric-value"><span id="m-m-der">-</span> / <span id="m-m-izq">-</span> cm</div>
+        </div>
+        <div class="metric-card pink">
+          <div class="metric-title">Grasa Tríceps</div>
+          <div class="metric-value"><span id="m-g-tri">-</span> %</div>
+        </div>
+        <div class="metric-card pink">
+          <div class="metric-title">Grasa Abdominal</div>
+          <div class="metric-value"><span id="m-g-abd">-</span> %</div>
+        </div>
+      </div>
+
+      <button id="logout-btn" class="logout-btn">Cerrar Sesión</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    // Reemplaza esto con tu configuración de Firebase Console
+    const firebaseConfig = {
+      apiKey: "TU_API_KEY",
+      authDomain: "TU_PROYECTO.firebaseapp.com",
+      projectId: "TU_PROYECTO",
+      storageBucket: "TU_PROYECTO.appspot.com",
+      messagingSenderId: "TU_SENDER_ID",
+      appId: "TU_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Enlace público CSV exportado de Google Sheets
+    const SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIWPk8cl4-Tr6lJylnL-TPvEcWgfIdRW3ktWr6LlOfWO0fDhFcnkwFzkbVl0GBoUzgYFAhJFps6q9D/pub?output=csv';
+
+    let historialUsuario = [];
+
+    // Login Event
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (err) {
+        alert("Error de autenticación: " + err.message);
+      }
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+
+    // Escuchador del Estado de Autenticación
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        document.getElementById('auth-section').style.display = 'none';
+        document.getElementById('dashboard-section').style.display = 'block';
+        
+        // Cargar los datos desde Google Sheets vía PapaParse
+        cargarDatosDesdeSheets(user.email);
+      } else {
+        document.getElementById('auth-section').style.display = 'block';
+        document.getElementById('dashboard-section').style.display = 'none';
+      }
+    });
+
+    // Función principal: Usa PapaParse para parsear el Sheets CSV
+    function cargarDatosDesdeSheets(userEmail) {
+      Papa.parse(SHEETS_CSV_URL, {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+          const data = results.data;
+          
+          // Filtrar las filas por el correo del usuario logueado
+          historialUsuario = data.filter(row => row['Correo'] && row['Correo'].toLowerCase() === userEmail.toLowerCase());
+
+          if (historialUsuario.length === 0) {
+            alert("No se encontraron mediciones registradas para este correo.");
+            return;
+          }
+
+          // Ordenar las mediciones por la fecha más reciente primero
+          historialUsuario.sort((a, b) => new Date(b['Fecha Medicion']) - new Date(a['Fecha Medicion']));
+
+          // Mostrar Nombre en el saludo
+          const primerRegistro = historialUsuario[0];
+          document.getElementById('user-greeting').textContent = `¡Hola, ${primerRegistro['Nombres']}!`;
+
+          // Poblar el Selector de Fechas
+          const selectFecha = document.getElementById('fecha-select');
+          selectFecha.innerHTML = '';
+
+          historialUsuario.forEach((medicion, idx) => {
+            const opt = document.createElement('option');
+            opt.value = idx; // Guardamos el índice
+            opt.textContent = medicion['Fecha Medicion'];
+            selectFecha.appendChild(opt);
+          });
+
+          // Renderizar por defecto la medición más reciente (índice 0)
+          renderizarMedicion(historialUsuario[0]);
+        }
+      });
+    }
+
+    // Cambiar datos al seleccionar otra fecha del dropdown
+    document.getElementById('fecha-select').addEventListener('change', (e) => {
+      const idx = e.target.value;
+      renderizarMedicion(historialUsuario[idx]);
+    });
+
+    // Pinta la información de las columnas de tu hoja
+    function renderizarMedicion(data) {
+      document.getElementById('m-peso').textContent = data['Peso'] || '-';
+      document.getElementById('m-cuello').textContent = data['Cuello'] || '-';
+      document.getElementById('m-b-der').textContent = data['Brazo Der'] || '-';
+      document.getElementById('m-b-izq').textContent = data['Brazo Izq'] || '-';
+      document.getElementById('m-m-der').textContent = data['Muslo Der'] || '-';
+      document.getElementById('m-m-izq').textContent = data['Muslo Izq'] || '-';
+      document.getElementById('m-g-tri').textContent = data['Grasa Tricep'] || '-';
+      document.getElementById('m-g-abd').textContent = data['Grasa Abdominal'] || '-';
+    }
+  </script>
+</body>
+</html>
