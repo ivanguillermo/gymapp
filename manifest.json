@@ -1,14 +1,19 @@
 {
-  "name": "Gym Metrics",
-  "short_name": "Gym",
+  "name": "TOPOFIT Sport Club",
+  "short_name": "TOPOFIT",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#121212",
-  "theme_color": "#2ecc71",
+  "background_color": "#141415",
+  "theme_color": "#71e845",
   "icons": [
     {
       "src": "topoFit.jpg",
       "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "topoFit.jpg",
+      "sizes": "512x512",
       "type": "image/jpeg"
     }
   ]
