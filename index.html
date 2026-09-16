@@ -55,6 +55,7 @@
     <!-- Vista 2: Dashboard del Usuario -->
     <div id="dashboard-section" style="display:none;">
       <h2 id="user-greeting">¡Hola!</h2>
+      <button id="logout-btn" class="logout-btn">Cerrar Sesión</button>
 
       <!-- Pestañas Principales -->
       <div class="app-tabs">
@@ -109,14 +110,30 @@
       </div>
 
       <!-- SECCIÓN 2: EJERCICIOS Y RUTINAS (Estructura Base) -->
-      <div id="sec-rutina" class="tab-content hidden">
-        <div class="section-title">📋 Ejercicios Programados para Hoy</div>
-        <div class="placeholder-card">
-          <p>📌 Próximamente: Módulo de ejercicios y rutinas asignadas.</p>
-        </div>
-      </div>
+      <!-- SECCIÓN 2: EJERCICIOS Y RUTINAS -->
+<div id="sec-rutina" class="tab-content hidden">
+  <div class="form-group">
+    <label for="dia-rutina-select">Selecciona el Día:</label>
+    <select id="dia-rutina-select">
+      <option value="lunes">Lunes</option>
+      <option value="martes">Martes</option>
+      <option value="miercoles">Miércoles</option>
+      <option value="jueves">Jueves</option>
+      <option value="viernes">Viernes</option>
+      <option value="sabado">Sábado</option>
+    </select>
+  </div>
 
-      <button id="logout-btn" class="logout-btn">Cerrar Sesión</button>
+  <div id="rutina-info-header" class="section-title">
+    <span id="rutina-grupo-muscular">Cargando...</span>
+  </div>
+
+  <div id="contenedor-ejercicios" class="ejercicios-grid">
+    <!-- Aquí se dibujan dinámicamente los ejercicios -->
+  </div>
+</div>
+
+      
     </div>
   </div>
 
