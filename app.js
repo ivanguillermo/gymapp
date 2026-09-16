@@ -24,7 +24,7 @@ const googleProvider = new GoogleAuthProvider();
 
 // Coloca aquí la URL CSV de la pestaña de Medidas y de la pestaña Rutinas
 const SHEETS_MEDIDAS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIWPk8cl4-Tr6lJylnL-TPvEcWgfIdRW3ktWr6LlOfWO0fDhFcnkwFzkbVl0GBoUzgYFAhJFps6q9D/pub?output=csv';
-const SHEETS_RUTINAS_URL = 'REEMPLAZAR_POR_URL_CSV_DE_RUTINAS';
+const SHEETS_RUTINAS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIWPk8cl4-Tr6lJylnL-TPvEcWgfIdRW3ktWr6LlOfWO0fDhFcnkwFzkbVl0GBoUzgYFAhJFps6q9D/pub?gid=1404477905&single=true&output=csv';
 
 let historialUsuario = [];
 let rutinaUsuarioActual = null;
