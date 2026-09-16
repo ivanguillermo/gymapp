@@ -218,3 +218,30 @@ button:hover {
   text-align: center;
   color: var(--text-muted);
 }
+/* Badge de Estado del Gimnasio */
+.gym-status-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.status-badge {
+  font-size: 0.8rem;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-open {
+  background-color: rgba(113, 232, 69, 0.15);
+  color: var(--primary-green);
+  border: 1px solid var(--primary-green);
+}
+
+.status-closed {
+  background-color: rgba(255, 117, 151, 0.15);
+  color: #ff7597;
+  border: 1px solid #ff7597;
+}
