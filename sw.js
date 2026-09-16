@@ -5,6 +5,7 @@ const ASSETS_TO_CACHE = [
   './styles.css',
   './manifest.json',
   './topoFit.jpg',
+  './app.js',
   'https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js'
 ];
 
