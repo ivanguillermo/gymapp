@@ -1,20 +1,22 @@
 {
-  "name": "TOPOFIT Sport Club",
-  "short_name": "TOPOFIT",
-  "start_url": "./index.html",
-  "display": "standalone",
-  "background_color": "#141415",
-  "theme_color": "#71e845",
+  "short_name": "TOPOFIT Sport Club",
+  "name": "TOPOFIT",
   "icons": [
     {
       "src": "topoFit.jpg",
       "sizes": "192x192",
-      "type": "image/jpeg"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "topoFit.jpg",
       "sizes": "512x512",
-      "type": "image/jpeg"
+      "type": "image/png"
     }
-  ]
+  ],
+  "start_url": "./index.html",
+  "background_color": "#141415",
+  "theme_color": "#71e845",
+  "display": "standalone",
+  "orientation": "portrait"
 }
