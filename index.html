@@ -99,6 +99,29 @@
       background-color: #e03e6e;
     }
 
+    .google-btn {
+      background-color: #ffffff;
+      color: #757575;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 15px;
+      font-weight: 600;
+    }
+
+    .google-btn:hover {
+      background-color: #eee;
+    }
+
+    .divider {
+      text-align: center;
+      margin: 15px 0;
+      color: #666;
+      font-size: 0.85em;
+      position: relative;
+    }
+
     .metrics-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -141,6 +164,20 @@
     <!-- Vista 1: Login -->
     <div id="auth-section">
       <h1>Gym Tracker</h1>
+      
+      <!-- Botón de Login con Google -->
+      <button id="google-login-btn" type="button" class="google-btn">
+        <svg width="18" height="18" viewBox="0 0 18 18">
+          <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.259h2.908c1.702-1.567 2.684-3.874 2.684-6.617z"/>
+          <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+          <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
+          <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+        </svg>
+        Continuar con Google
+      </button>
+
+      <div class="divider">ó ingresa con tus credenciales</div>
+
       <form id="login-form">
         <div class="form-group">
           <label>Correo Electrónico</label>
@@ -172,7 +209,7 @@
         <div class="metric-card"><div class="metric-title">Altura</div><div class="metric-value"><span id="m-altura">-</span> cm</div></div>
       </div>
 
-      <!-- SECCIÓN 2: Plicometría (Pliegues Cutáneos en mm) -->
+      <!-- SECCIÓN 2: Plicometría -->
       <div class="section-title">📐 Plicometría (Pliegues)</div>
       <div class="metrics-grid">
         <div class="metric-card pink"><div class="metric-title">Tríceps</div><div class="metric-value"><span id="m-pli-tri">-</span> mm</div></div>
@@ -211,7 +248,14 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { 
+      getAuth, 
+      signInWithEmailAndPassword, 
+      GoogleAuthProvider, 
+      signInWithPopup, 
+      onAuthStateChanged, 
+      signOut 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDSNvI2PkCVkr-J3yjXy2T8rkbjujj-9AY",
@@ -225,12 +269,13 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const googleProvider = new GoogleAuthProvider();
 
     const SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIWPk8cl4-Tr6lJylnL-TPvEcWgfIdRW3ktWr6LlOfWO0fDhFcnkwFzkbVl0GBoUzgYFAhJFps6q9D/pub?output=csv';
 
     let historialUsuario = [];
 
-    // Evento Login
+    // Login Tradicional (Correo y Contraseña)
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = document.getElementById('email').value.trim();
@@ -240,6 +285,15 @@
         await signInWithEmailAndPassword(auth, email, password);
       } catch (err) {
         alert("Error de autenticación: " + err.message);
+      }
+    });
+
+    // Login con Google
+    document.getElementById('google-login-btn').addEventListener('click', async () => {
+      try {
+        await signInWithPopup(auth, googleProvider);
+      } catch (err) {
+        alert("Error al iniciar sesión con Google: " + err.message);
       }
     });
 
@@ -269,7 +323,7 @@
           historialUsuario = data.filter(row => row['Correo'] && row['Correo'].trim().toLowerCase() === userEmail.toLowerCase());
 
           if (historialUsuario.length === 0) {
-            alert("No se encontraron mediciones registradas para este correo.");
+            alert("No se encontraron mediciones registradas para el correo: " + userEmail);
             return;
           }
 
