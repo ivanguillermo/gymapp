@@ -3,169 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gym Metrics PWA</title>
+  <title>TOPOFIT Sport Club</title>
   <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
   <!-- PapaParse para procesar CSV / Sheets -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-
-  <style>
-    :root {
-      --primary-green: #2ecc71;
-      --accent-pink: #ff477e;
-      --bg-dark: #121212;
-      --card-bg: #1e1e1e;
-      --subcard-bg: #282828;
-      --text-light: #f5f5f5;
-    }
-
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--bg-dark);
-      color: var(--text-light);
-      margin: 0;
-      padding: 15px;
-      display: flex;
-      justify-content: center;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 480px;
-      background: var(--card-bg);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-      border: 1px solid #333;
-    }
-
-    h1, h2 {
-      text-align: center;
-      color: var(--primary-green);
-      margin-bottom: 20px;
-    }
-
-    .section-title {
-      color: var(--accent-pink);
-      font-size: 1.05rem;
-      border-bottom: 1px solid #333;
-      padding-bottom: 5px;
-      margin-top: 25px;
-      margin-bottom: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .form-group {
-      margin-bottom: 15px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-size: 0.9em;
-      color: #aaa;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #444;
-      background-color: #2a2a2a;
-      color: #fff;
-      box-sizing: border-box;
-      font-size: 1rem;
-    }
-
-    input:focus, select:focus {
-      outline: none;
-      border-color: var(--accent-pink);
-    }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      background-color: var(--accent-pink);
-      color: white;
-      font-weight: bold;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.2s ease;
-    }
-
-    button:hover {
-      background-color: #e03e6e;
-    }
-
-    .google-btn {
-      background-color: #ffffff;
-      color: #757575;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 15px;
-      font-weight: 600;
-    }
-
-    .google-btn:hover {
-      background-color: #eee;
-    }
-
-    .divider {
-      text-align: center;
-      margin: 15px 0;
-      color: #666;
-      font-size: 0.85em;
-      position: relative;
-    }
-
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .metric-card {
-      background: var(--subcard-bg);
-      padding: 10px 12px;
-      border-radius: 8px;
-      border-left: 3px solid var(--primary-green);
-    }
-
-    .metric-card.pink {
-      border-left-color: var(--accent-pink);
-    }
-
-    .metric-title {
-      font-size: 0.75em;
-      color: #aaa;
-    }
-
-    .metric-value {
-      font-size: 1.1em;
-      font-weight: bold;
-      margin-top: 3px;
-    }
-
-    .logout-btn {
-      background: transparent;
-      border: 1px solid var(--accent-pink);
-      color: var(--accent-pink);
-      margin-top: 30px;
-    }
-  </style>
 </head>
 <body>
 
   <div class="container">
+    <!-- Banner opcional de instalación PWA -->
+    <div id="pwa-install-banner" class="install-banner" style="display: none;">
+      <span>📱 Instala la App en tu inicio</span>
+      <button id="install-pwa-btn" class="btn-install">Instalar</button>
+    </div>
+
+    <!-- Logo Superior -->
+    <div class="logo-container">
+      <img src="topoFit.jpg" alt="TOPOFIT Logo" class="app-logo">
+    </div>
+
     <!-- Vista 1: Login -->
     <div id="auth-section">
-      <h1>Gym Tracker</h1>
+      <h1>Sport Club TOPOFIT</h1>
       
-      <!-- Botón de Login con Google -->
       <button id="google-login-btn" type="button" class="google-btn">
         <svg width="18" height="18" viewBox="0 0 18 18">
           <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.259h2.908c1.702-1.567 2.684-3.874 2.684-6.617z"/>
@@ -194,216 +55,72 @@
     <!-- Vista 2: Dashboard del Usuario -->
     <div id="dashboard-section" style="display:none;">
       <h2 id="user-greeting">¡Hola!</h2>
+
+      <!-- Pestañas Principales -->
+      <div class="app-tabs">
+        <button id="tab-btn-medidas" class="tab-btn active">📐 Medidas</button>
+        <button id="tab-btn-rutina" class="tab-btn">🏋️ Rutina del Día</button>
+      </div>
       
-      <div class="form-group">
-        <label for="fecha-select">Seleccionar Fecha de Medición:</label>
-        <select id="fecha-select"></select>
+      <!-- SECCIÓN 1: MEDIDAS Y EVALUACIÓN -->
+      <div id="sec-medidas" class="tab-content">
+        <div class="form-group">
+          <label for="fecha-select">Seleccionar Fecha de Medición:</label>
+          <select id="fecha-select"></select>
+        </div>
+
+        <div class="section-title">📊 Composición Corporal</div>
+        <div class="metrics-grid">
+          <div class="metric-card"><div class="metric-title">Peso</div><div class="metric-value"><span id="m-peso">-</span> kg</div></div>
+          <div class="metric-card"><div class="metric-title">Grasa Corporal</div><div class="metric-value"><span id="m-grasa-corp">-</span> %</div></div>
+          <div class="metric-card"><div class="metric-title">Masa Corporal</div><div class="metric-value"><span id="m-masa-corp">-</span> kg</div></div>
+          <div class="metric-card"><div class="metric-title">Altura</div><div class="metric-value"><span id="m-altura">-</span> cm</div></div>
+        </div>
+
+        <div class="section-title">📐 Plicometría (Pliegues)</div>
+        <div class="metrics-grid">
+          <div class="metric-card purple"><div class="metric-title">Tríceps</div><div class="metric-value"><span id="m-pli-tri">-</span> mm</div></div>
+          <div class="metric-card purple"><div class="metric-title">Subescapular</div><div class="metric-value"><span id="m-pli-sub">-</span> mm</div></div>
+          <div class="metric-card purple"><div class="metric-title">Suprailíaco</div><div class="metric-value"><span id="m-pli-sup">-</span> mm</div></div>
+          <div class="metric-card purple"><div class="metric-title">Abdominal</div><div class="metric-value"><span id="m-pli-abd">-</span> mm</div></div>
+          <div class="metric-card purple"><div class="metric-title">Muslo</div><div class="metric-value"><span id="m-pli-mus">-</span> mm</div></div>
+          <div class="metric-card purple"><div class="metric-title">Pierna</div><div class="metric-value"><span id="m-pli-pie">-</span> mm</div></div>
+        </div>
+
+        <div class="section-title">📏 Perímetros Centrales e ICC</div>
+        <div class="metrics-grid">
+          <div class="metric-card"><div class="metric-title">Cuello</div><div class="metric-value"><span id="m-cuello">-</span> cm</div></div>
+          <div class="metric-card"><div class="metric-title">Cintura</div><div class="metric-value"><span id="m-cintura">-</span> cm</div></div>
+          <div class="metric-card"><div class="metric-title">Abdomen</div><div class="metric-value"><span id="m-abdomen">-</span> cm</div></div>
+          <div class="metric-card"><div class="metric-title">Cadera</div><div class="metric-value"><span id="m-cadera">-</span> cm</div></div>
+          <div class="metric-card purple" style="grid-column: span 2;"><div class="metric-title">ICC (Cintura / Cadera)</div><div class="metric-value"><span id="m-icc">-</span></div></div>
+        </div>
+
+        <div class="section-title">💪 Extremidades y Torso</div>
+        <div class="metrics-grid">
+          <div class="metric-card"><div class="metric-title">Pecho</div><div class="metric-value"><span id="m-pecho">-</span> cm</div></div>
+          <div class="metric-card"><div class="metric-title">Brazo Rel. (D / I)</div><div class="metric-value"><span id="m-b-rel-d">-</span> / <span id="m-b-rel-i">-</span> cm</div></div>
+          <div class="metric-card"><div class="metric-title">Brazo Con. (D / I)</div><div class="metric-value"><span id="m-b-con-d">-</span> / <span id="m-b-con-i">-</span> cm</div></div>
+          <div class="metric-card"><div class="metric-title">Antebrazo (D / I)</div><div class="metric-value"><span id="m-ant-d">-</span> / <span id="m-ant-i">-</span> cm</div></div>
+          <div class="metric-card"><div class="metric-title">Muslo Sup. (D / I)</div><div class="metric-value"><span id="m-m-sup-d">-</span> / <span id="m-m-sup-i">-</span> cm</div></div>
+          <div class="metric-card"><div class="metric-title">Muslo Med. (D / I)</div><div class="metric-value"><span id="m-m-med-d">-</span> / <span id="m-m-med-i">-</span> cm</div></div>
+          <div class="metric-card"><div class="metric-title">Pantorrilla (D / I)</div><div class="metric-value"><span id="m-pan-d">-</span> / <span id="m-pan-i">-</span> cm</div></div>
+        </div>
       </div>
 
-      <!-- SECCIÓN 1: Composición Corporal -->
-      <div class="section-title">📊 Composición Corporal</div>
-      <div class="metrics-grid">
-        <div class="metric-card"><div class="metric-title">Peso</div><div class="metric-value"><span id="m-peso">-</span> kg</div></div>
-        <div class="metric-card"><div class="metric-title">Grasa Corporal</div><div class="metric-value"><span id="m-grasa-corp">-</span> %</div></div>
-        <div class="metric-card"><div class="metric-title">Masa Corporal</div><div class="metric-value"><span id="m-masa-corp">-</span> kg</div></div>
-        <div class="metric-card"><div class="metric-title">Altura</div><div class="metric-value"><span id="m-altura">-</span> cm</div></div>
-      </div>
-
-      <!-- SECCIÓN 2: Plicometría -->
-      <div class="section-title">📐 Plicometría (Pliegues)</div>
-      <div class="metrics-grid">
-        <div class="metric-card pink"><div class="metric-title">Tríceps</div><div class="metric-value"><span id="m-pli-tri">-</span> mm</div></div>
-        <div class="metric-card pink"><div class="metric-title">Subescapular</div><div class="metric-value"><span id="m-pli-sub">-</span> mm</div></div>
-        <div class="metric-card pink"><div class="metric-title">Suprailíaco</div><div class="metric-value"><span id="m-pli-sup">-</span> mm</div></div>
-        <div class="metric-card pink"><div class="metric-title">Abdominal</div><div class="metric-value"><span id="m-pli-abd">-</span> mm</div></div>
-        <div class="metric-card pink"><div class="metric-title">Muslo</div><div class="metric-value"><span id="m-pli-mus">-</span> mm</div></div>
-        <div class="metric-card pink"><div class="metric-title">Pierna</div><div class="metric-value"><span id="m-pli-pie">-</span> mm</div></div>
-      </div>
-
-      <!-- SECCIÓN 3: Perímetros Centrales e Índices -->
-      <div class="section-title">📏 Perímetros Centrales e ICC</div>
-      <div class="metrics-grid">
-        <div class="metric-card"><div class="metric-title">Cuello</div><div class="metric-value"><span id="m-cuello">-</span> cm</div></div>
-        <div class="metric-card"><div class="metric-title">Cintura</div><div class="metric-value"><span id="m-cintura">-</span> cm</div></div>
-        <div class="metric-card"><div class="metric-title">Abdomen</div><div class="metric-value"><span id="m-abdomen">-</span> cm</div></div>
-        <div class="metric-card"><div class="metric-title">Cadera</div><div class="metric-value"><span id="m-cadera">-</span> cm</div></div>
-        <div class="metric-card pink" style="grid-column: span 2;"><div class="metric-title">ICC (Cintura / Cadera)</div><div class="metric-value"><span id="m-icc">-</span></div></div>
-      </div>
-
-      <!-- SECCIÓN 4: Perímetros Musculares -->
-      <div class="section-title">💪 Extremidades y Torso</div>
-      <div class="metrics-grid">
-        <div class="metric-card"><div class="metric-title">Pecho</div><div class="metric-value"><span id="m-pecho">-</span> cm</div></div>
-        <div class="metric-card"><div class="metric-title">Brazo Relajado (D / I)</div><div class="metric-value"><span id="m-b-rel-d">-</span> / <span id="m-b-rel-i">-</span> cm</div></div>
-        <div class="metric-card"><div class="metric-title">Brazo Contr. (D / I)</div><div class="metric-value"><span id="m-b-con-d">-</span> / <span id="m-b-con-i">-</span> cm</div></div>
-        <div class="metric-card"><div class="metric-title">Antebrazo (D / I)</div><div class="metric-value"><span id="m-ant-d">-</span> / <span id="m-ant-i">-</span> cm</div></div>
-        <div class="metric-card"><div class="metric-title">Muslo Sup. (D / I)</div><div class="metric-value"><span id="m-m-sup-d">-</span> / <span id="m-m-sup-i">-</span> cm</div></div>
-        <div class="metric-card"><div class="metric-title">Muslo Med. (D / I)</div><div class="metric-value"><span id="m-m-med-d">-</span> / <span id="m-m-med-i">-</span> cm</div></div>
-        <div class="metric-card"><div class="metric-title">Pantorrilla (D / I)</div><div class="metric-value"><span id="m-pan-d">-</span> / <span id="m-pan-i">-</span> cm</div></div>
+      <!-- SECCIÓN 2: EJERCICIOS Y RUTINAS (Estructura Base) -->
+      <div id="sec-rutina" class="tab-content hidden">
+        <div class="section-title">📋 Ejercicios Programados para Hoy</div>
+        <div class="placeholder-card">
+          <p>📌 Próximamente: Módulo de ejercicios y rutinas asignadas.</p>
+        </div>
       </div>
 
       <button id="logout-btn" class="logout-btn">Cerrar Sesión</button>
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { 
-      getAuth, 
-      signInWithEmailAndPassword, 
-      GoogleAuthProvider, 
-      signInWithPopup, 
-      onAuthStateChanged, 
-      signOut 
-    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyDSNvI2PkCVkr-J3yjXy2T8rkbjujj-9AY",
-        authDomain: "gymapp-4d679.firebaseapp.com",
-        projectId: "gymapp-4d679",
-        storageBucket: "gymapp-4d679.firebasestorage.app",
-        messagingSenderId: "424474817559",
-        appId: "1:424474817559:web:1966b067d1151d5cfe5852",
-        measurementId: "G-ZX5Y7N9HMN"  
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const googleProvider = new GoogleAuthProvider();
-
-    const SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIWPk8cl4-Tr6lJylnL-TPvEcWgfIdRW3ktWr6LlOfWO0fDhFcnkwFzkbVl0GBoUzgYFAhJFps6q9D/pub?output=csv';
-
-    let historialUsuario = [];
-
-    // Login Tradicional (Correo y Contraseña)
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-      } catch (err) {
-        alert("Error de autenticación: " + err.message);
-      }
-    });
-
-    // Login con Google
-    document.getElementById('google-login-btn').addEventListener('click', async () => {
-      try {
-        await signInWithPopup(auth, googleProvider);
-      } catch (err) {
-        alert("Error al iniciar sesión con Google: " + err.message);
-      }
-    });
-
-    document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
-
-    // Escuchador de Autenticación
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        document.getElementById('auth-section').style.display = 'none';
-        document.getElementById('dashboard-section').style.display = 'block';
-        cargarDatosDesdeSheets(user.email);
-      } else {
-        document.getElementById('auth-section').style.display = 'block';
-        document.getElementById('dashboard-section').style.display = 'none';
-      }
-    });
-
-    // Cargar datos del Sheets
-    function cargarDatosDesdeSheets(userEmail) {
-      Papa.parse(SHEETS_CSV_URL, {
-        download: true,
-        header: true,
-        skipEmptyLines: true,
-        complete: function(results) {
-          const data = results.data;
-          
-          historialUsuario = data.filter(row => row['Correo'] && row['Correo'].trim().toLowerCase() === userEmail.toLowerCase());
-
-          if (historialUsuario.length === 0) {
-            alert("No se encontraron mediciones registradas para el correo: " + userEmail);
-            return;
-          }
-
-          // Ordenar por fecha más reciente
-          historialUsuario.sort((a, b) => {
-            const fechaA = new Date(a['Fecha Medicion'] || a['Fecha Medicion Peso']);
-            const fechaB = new Date(b['Fecha Medicion'] || b['Fecha Medicion Peso']);
-            return fechaB - fechaA;
-          });
-
-          const primerRegistro = historialUsuario[0];
-          document.getElementById('user-greeting').textContent = `¡Hola, ${primerRegistro['Nombres']}!`;
-
-          const selectFecha = document.getElementById('fecha-select');
-          selectFecha.innerHTML = '';
-
-          historialUsuario.forEach((medicion, idx) => {
-            const opt = document.createElement('option');
-            opt.value = idx;
-            opt.textContent = medicion['Fecha Medicion'] || medicion['Fecha Medicion Peso'];
-            selectFecha.appendChild(opt);
-          });
-
-          renderizarMedicion(historialUsuario[0]);
-        }
-      });
-    }
-
-    document.getElementById('fecha-select').addEventListener('change', (e) => {
-      const idx = e.target.value;
-      renderizarMedicion(historialUsuario[idx]);
-    });
-
-    function renderizarMedicion(d) {
-      // 1. General
-      document.getElementById('m-peso').textContent = d['Peso'] || '-';
-      document.getElementById('m-grasa-corp').textContent = d['Grasa Corporal'] || '-';
-      document.getElementById('m-masa-corp').textContent = d['Masa Corporal'] || '-';
-      document.getElementById('m-altura').textContent = d['Altura'] || '-';
-
-      // 2. Plicometria
-      document.getElementById('m-pli-tri').textContent = d['Tricep'] || '-';
-      document.getElementById('m-pli-sub').textContent = d['Subescapular'] || '-';
-      document.getElementById('m-pli-sup').textContent = d['Suprailiaco'] || '-';
-      document.getElementById('m-pli-abd').textContent = d['Abdominal'] || '-';
-      document.getElementById('m-pli-mus').textContent = d['Muslo'] || '-';
-      document.getElementById('m-pli-pie').textContent = d['Pierna'] || '-';
-
-      // 3. Perímetros / ICC
-      document.getElementById('m-cuello').textContent = d['Cuello'] || '-';
-      document.getElementById('m-cintura').textContent = d['Cintura'] || '-';
-      document.getElementById('m-abdomen').textContent = d['Abdomen'] || '-';
-      document.getElementById('m-cadera').textContent = d['Cadera'] || '-';
-      document.getElementById('m-icc').textContent = d['ICC'] || '-';
-
-      // 4. Extremidades
-      document.getElementById('m-pecho').textContent = d['Pecho'] || '-';
-      document.getElementById('m-b-rel-d').textContent = d['Brazo Der'] || d['Brazo Der '] || '-';
-      document.getElementById('m-b-rel-i').textContent = d['Brazo Izq'] || '-';
-      document.getElementById('m-b-con-d').textContent = d['Brazo Der Contr'] || '-';
-      document.getElementById('m-b-con-i').textContent = d['Brazo Izq Contr'] || '-';
-      document.getElementById('m-ant-d').textContent = d['Antebrazo Der'] || '-';
-      document.getElementById('m-ant-i').textContent = d['Antebrazo Izq'] || '-';
-      document.getElementById('m-m-sup-d').textContent = d['Muslo Sup Der'] || '-';
-      document.getElementById('m-m-sup-i').textContent = d['Muslo Sup Izq'] || '-';
-      document.getElementById('m-m-med-d').textContent = d['Muslo Med Der'] || '-';
-      document.getElementById('m-m-med-i').textContent = d['Muslo Med Izq'] || '-';
-      document.getElementById('m-pan-d').textContent = d['Pantorrila Der'] || d['Pantorrilla Der'] || '-';
-      document.getElementById('m-pan-i').textContent = d['Pantorrilla Izq'] || '-';
-    }
-  </script>
-
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then((reg) => console.log('Service Worker registrado con éxito:', reg.scope))
-          .catch((err) => console.error('Error al registrar Service Worker:', err));
-      });
-    }
-  </script>
+  <!-- Script principal como módulo JS -->
+  <script type="module" src="app.js"></script>
 </body>
 </html>
