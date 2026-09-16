@@ -190,3 +190,74 @@ if ('serviceWorker' in navigator) {
       .catch((err) => console.error('Error al registrar SW:', err));
   });
 }
+
+let rutinaUsuarioActual = null;
+
+// Mapa de correspondencia entre el select y los encabezados del CSV
+const mapaColumnas = {
+  'lunes': { grupo: 'lunes', ejercicios: 'Ejercicios_lun' },
+  'martes': { grupo: 'martes', ejercicios: 'Ejercicios_mar' },
+  'miercoles': { grupo: 'miércoles', ejercicios: 'Ejercicios_mie' },
+  'jueves': { grupo: 'jueves', ejercicios: 'Ejercicios_jue' },
+  'viernes': { grupo: 'viernes', ejercicios: 'Ejercicios_vie' },
+  'sabado': { grupo: 'sábado', ejercicios: 'Ejercicios_sab' }
+};
+
+// Guardar los datos de rutinas cargados desde el CSV
+function guardarDatosRutina(datosRutinas, userEmail) {
+  rutinaUsuarioActual = datosRutinas.find(
+    row => row['Correo'] && row['Correo'].trim().toLowerCase() === userEmail.toLowerCase()
+  );
+  
+  if (rutinaUsuarioActual) {
+    // Seleccionar automáticamente el día actual de la semana
+    const diasSemana = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+    const diaHoy = diasSemana[new Date().getDay()];
+    const diaInicial = mapaColumnas[diaHoy] ? diaHoy : 'lunes';
+    
+    document.getElementById('dia-rutina-select').value = diaInicial;
+    mostrarRutinaPorDia(diaInicial);
+  }
+}
+
+// Escuchar cambios de selección de día
+document.getElementById('dia-rutina-select').addEventListener('change', (e) => {
+  mostrarRutinaPorDia(e.target.value);
+});
+
+// Renderizar grupo muscular y lista de ejercicios
+function mostrarRutinaPorDia(diaClave) {
+  if (!rutinaUsuarioActual) return;
+
+  const config = mapaColumnas[diaClave];
+  const grupoMuscular = rutinaUsuarioActual[config.grupo] || 'Descanso';
+  const ejerciciosRaw = rutinaUsuarioActual[config.ejercicios] || '';
+
+  const headerElem = document.getElementById('rutina-grupo-muscular');
+  const contenedor = document.getElementById('contenedor-ejercicios');
+
+  headerElem.textContent = `🎯 Enfoque: ${grupoMuscular}`;
+  contenedor.innerHTML = '';
+
+  if (!ejerciciosRaw || grupoMuscular.toLowerCase().includes('descanso')) {
+    contenedor.innerHTML = `
+      <div class="placeholder-card">
+        <p>😴 Día de descanso programado o sin ejercicios asignados.</p>
+      </div>`;
+    return;
+  }
+
+  // Separar los ejercicios por comas
+  const listaEjercicios = ejerciciosRaw.split(',').map(e => e.trim()).filter(Boolean);
+
+  listaEjercicios.forEach((ejercicioNombre, index) => {
+    const card = document.createElement('div');
+    card.className = 'metric-card purple';
+    card.style.marginBottom = '10px';
+    card.innerHTML = `
+      <div class="metric-title">Ejercicio #${index + 1}</div>
+      <div class="metric-value" style="font-size: 1rem; margin-top: 5px;">${ejercicioNombre}</div>
+    `;
+    contenedor.appendChild(card);
+  });
+}
