@@ -6,13 +6,17 @@
   <title>TOPOFIT Sport Club</title>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="styles.css">
-  <!-- PapaParse para procesar CSV / Sheets -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </head>
 <body>
 
   <div class="container">
-    <!-- Banner opcional de instalación PWA -->
+    <!-- Indicador de Estado del Gym -->
+    <div class="gym-status-bar">
+      <span class="status-badge status-open" id="gym-status-badge">🟢 ABIERTO</span>
+    </div>
+
+    <!-- Banner PWA -->
     <div id="pwa-install-banner" class="install-banner" style="display: none;">
       <span>📱 Instala la App en tu inicio</span>
       <button id="install-pwa-btn" class="btn-install">Instalar</button>
@@ -56,11 +60,11 @@
     <div id="dashboard-section" style="display:none;">
       <h2 id="user-greeting">¡Hola!</h2>
       <button id="logout-btn" class="logout-btn">Cerrar Sesión</button>
-
       <!-- Pestañas Principales -->
       <div class="app-tabs">
         <button id="tab-btn-medidas" class="tab-btn active">📐 Medidas</button>
-        <button id="tab-btn-rutina" class="tab-btn">🏋️ Rutina del Día</button>
+        <button id="tab-btn-rutina" class="tab-btn">🏋️ Rutina</button>
+        <button id="tab-btn-info" class="tab-btn">ℹ️ Info Gym</button>
       </div>
       
       <!-- SECCIÓN 1: MEDIDAS Y EVALUACIÓN -->
@@ -109,35 +113,49 @@
         </div>
       </div>
 
-      <!-- SECCIÓN 2: EJERCICIOS Y RUTINAS (Estructura Base) -->
       <!-- SECCIÓN 2: EJERCICIOS Y RUTINAS -->
-<div id="sec-rutina" class="tab-content hidden">
-  <div class="form-group">
-    <label for="dia-rutina-select">Selecciona el Día:</label>
-    <select id="dia-rutina-select">
-      <option value="lunes">Lunes</option>
-      <option value="martes">Martes</option>
-      <option value="miercoles">Miércoles</option>
-      <option value="jueves">Jueves</option>
-      <option value="viernes">Viernes</option>
-      <option value="sabado">Sábado</option>
-    </select>
-  </div>
+      <div id="sec-rutina" class="tab-content hidden">
+        <div class="form-group">
+          <label for="dia-rutina-select">Selecciona el Día:</label>
+          <select id="dia-rutina-select">
+            <option value="lunes">Lunes</option>
+            <option value="martes">Martes</option>
+            <option value="miercoles">Miércoles</option>
+            <option value="jueves">Jueves</option>
+            <option value="viernes">Viernes</option>
+            <option value="sabado">Sábado</option>
+          </select>
+        </div>
 
-  <div id="rutina-info-header" class="section-title">
-    <span id="rutina-grupo-muscular">Cargando...</span>
-  </div>
+        <div id="rutina-info-header" class="section-title">
+          <span id="rutina-grupo-muscular">Cargando...</span>
+        </div>
 
-  <div id="contenedor-ejercicios" class="ejercicios-grid">
-    <!-- Aquí se dibujan dinámicamente los ejercicios -->
-  </div>
-</div>
+        <div id="contenedor-ejercicios" class="ejercicios-grid"></div>
+      </div>
+
+      <!-- SECCIÓN 3: INFORMACIÓN DEL GIMNASIO -->
+      <div id="sec-info" class="tab-content hidden">
+        <div class="section-title">⏰ Horarios de Atención</div>
+        <div class="metric-card" style="margin-bottom: 10px;">
+          <div class="metric-title">Lunes a Viernes</div>
+          <div class="metric-value" id="info-horario-semana">--:-- a --:--</div>
+        </div>
+        <div class="metric-card" style="margin-bottom: 15px;">
+          <div class="metric-title">Sábados</div>
+          <div class="metric-value" id="info-horario-sabado">--:-- a --:--</div>
+        </div>
+
+        <div class="section-title">📢 Avisos Importantes</div>
+        <div class="placeholder-card" id="info-avisos" style="text-align: left; font-size: 0.95rem;">
+          Cargando avisos e información del club...
+        </div>
+      </div>
 
       
     </div>
   </div>
 
-  <!-- Script principal como módulo JS -->
   <script type="module" src="app.js"></script>
 </body>
 </html>
