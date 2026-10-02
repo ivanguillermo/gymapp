@@ -253,6 +253,7 @@ if ('serviceWorker' in navigator) {
 const SHEETS_CONFIG_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIWPk8cl4-Tr6lJylnL-TPvEcWgfIdRW3ktWr6LlOfWO0fDhFcnkwFzkbVl0GBoUzgYFAhJFps6q9D/pub?gid=2123906384&single=true&output=csv';
 
 // Cargar Configuración del Gym (Horarios y Estado)
+// Cargar Configuración del Gym (Horarios y Estado)
 async function cargarConfiguracionGym() {
   try {
     const res = await fetch(`${API_URL}?sheet=config`);
@@ -260,9 +261,11 @@ async function cargarConfiguracionGym() {
 
     const configMap = {};
     data.forEach(row => {
-      const key = Object.keys(row)[0];
-      const val = row[key];
-      if (key) configMap[key.trim()] = val ? val.toString().trim() : '';
+      // Extrae la primera y segunda columna independientemente del nombre de las cabeceras
+      const keys = Object.keys(row);
+      const key = row[keys[0]];
+      const val = row[keys[1]];
+      if (key) configMap[key.toString().trim()] = val ? val.toString().trim() : '';
     });
 
     const statusBadge = document.getElementById('gym-status-badge');
