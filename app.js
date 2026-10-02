@@ -32,10 +32,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
-// Coloca aquí la URL CSV de la pestaña de Medidas y de la pestaña Rutinas
-const SHEETS_MEDIDAS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIWPk8cl4-Tr6lJylnL-TPvEcWgfIdRW3ktWr6LlOfWO0fDhFcnkwFzkbVl0GBoUzgYFAhJFps6q9D/pub?output=csv';
-const SHEETS_RUTINAS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIWPk8cl4-Tr6lJylnL-TPvEcWgfIdRW3ktWr6LlOfWO0fDhFcnkwFzkbVl0GBoUzgYFAhJFps6q9D/pub?gid=1404477905&single=true&output=csv';
-
 let historialUsuario = [];
 let rutinaUsuarioActual = null;
 
@@ -249,10 +245,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// Agrega la URL del CSV de la pestaña config
-const SHEETS_CONFIG_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIWPk8cl4-Tr6lJylnL-TPvEcWgfIdRW3ktWr6LlOfWO0fDhFcnkwFzkbVl0GBoUzgYFAhJFps6q9D/pub?gid=2123906384&single=true&output=csv';
 
-// Cargar Configuración del Gym (Horarios y Estado)
 // Cargar Configuración del Gym (Horarios y Estado)
 async function cargarConfiguracionGym() {
   try {
