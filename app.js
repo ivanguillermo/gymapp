@@ -8,7 +8,7 @@ import {
   signOut 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-const API_URL = 'https://script.google.com/macros/s/AKfycbw9OxJVd4EeP5XCWFubOrWs4dAEOSDGPlG55Ize0rBiGAgFSPOcBDupxI74CMMHdeDO/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwLRdZBdtz6OyoQ6uBhkwyC4ck6h4Fn61kRHxRVOtA46MkrykhSbGUzxvpt7PJHtgnQ/exec';
 
 async function obtenerTokenUsuario() {
   const user = auth.currentUser;
