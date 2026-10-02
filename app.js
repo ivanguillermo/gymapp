@@ -245,3 +245,42 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(console.error);
   });
 }
+
+// Agrega la URL del CSV de la pestaña config
+const SHEETS_CONFIG_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIWPk8cl4-Tr6lJylnL-TPvEcWgfIdRW3ktWr6LlOfWO0fDhFcnkwFzkbVl0GBoUzgYFAhJFps6q9D/pub?gid=2123906384&single=true&output=csv';
+
+// Cargar Configuración del Gym (Horarios y Estado)
+function cargarConfiguracionGym() {
+  Papa.parse(SHEETS_CONFIG_URL, {
+    download: true,
+    complete: function(results) {
+      // Convertimos el CSV estilo clave-valor en un objeto JavaScript
+      const configMap = {};
+      results.data.forEach(row => {
+        if (row[0] && row[1]) {
+          configMap[row[0].trim()] = row[1].trim();
+        }
+      });
+
+      // Actualizar estado ABIERTO / CERRADO
+      const statusBadge = document.getElementById('gym-status-badge');
+      const estado = (configMap['Abierto'] || '').toLowerCase();
+
+      if (estado === 'si' || estado === 'sí') {
+        statusBadge.textContent = '🟢 ABIERTO';
+        statusBadge.className = 'status-badge status-open';
+      } else {
+        statusBadge.textContent = '🔴 CERRADO';
+        statusBadge.className = 'status-badge status-closed';
+      }
+
+      // Actualizar horarios en la pestaña Info
+      if (configMap['Lunes a Viernes']) {
+        document.getElementById('info-horario-semana').textContent = configMap['Lunes a Viernes'];
+      }
+      if (configMap['Sabado'] || configMap['Sábado']) {
+        document.getElementById('info-horario-sabado').textContent = configMap['Sabado'] || configMap['Sábado'];
+      }
+    }
+  });
+}
