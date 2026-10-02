@@ -68,6 +68,7 @@ onAuthStateChanged(auth, (user) => {
     document.getElementById('dashboard-section').style.display = 'block';
     cargarMedidas(user.email);
     cargarRutinas(user.email);
+    cargarConfiguracionGym(); 
   } else {
     document.getElementById('auth-section').style.display = 'block';
     document.getElementById('dashboard-section').style.display = 'none';
