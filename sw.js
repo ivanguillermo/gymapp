@@ -31,7 +31,20 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+    fetch(event.request)
+      .then((response) => {
+        // Clonar y guardar la respuesta de los CSV en la caché local del usuario
+        if (event.request.url.includes('docs.google.com')) {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+        }
+        return response;
+      })
+      .catch(() => {
+        // Si no hay conexión (fetch falla), devolver desde la caché guardada previamente
+        return caches.match(event.request);
+      })
   );
 });
