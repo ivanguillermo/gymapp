@@ -1,14 +1,16 @@
-const CACHE_NAME = 'gym-app-v2';
+const CACHE_NAME = 'gym-app-v3';
+
+// Archivos estáticos de la App
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './styles.css',
   './manifest.json',
   './topoFit.jpg',
-  './app.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js'
+  './app.js'
 ];
 
+// Instalación: guardar la estructura base de la app
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
@@ -16,6 +18,7 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
+// Activación: borrar cachés antiguas si se actualiza la versión
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -29,22 +32,33 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Interceptor de peticiones (Network-First con fallback a Cache)
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
     fetch(event.request)
-      .then((response) => {
-        // Clonar y guardar la respuesta de los CSV en la caché local del usuario
-        if (event.request.url.includes('docs.google.com')) {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+      .then((networkResponse) => {
+        // Si hay internet y la petición es hacia Apps Script (o recursos de la app), guarda/actualiza en caché
+        if (event.request.url.includes('script.google.com') || event.request.url.includes('googleusercontent.com')) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
         }
-        return response;
+        return networkResponse;
       })
-      .catch(() => {
-        // Si no hay conexión (fetch falla), devolver desde la caché guardada previamente
-        return caches.match(event.request);
+      .catch(async () => {
+        // Si NO hay internet (falla fetch), busca y entrega la última respuesta guardada en caché
+        const cachedResponse = await caches.match(event.request);
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+
+        // Si no existe caché específica pero es una navegación, entrega index.html
+        if (event.request.mode === 'navigate') {
+          return caches.match('./index.html');
+        }
       })
   );
 });
