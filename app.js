@@ -90,6 +90,7 @@ tabRutina.addEventListener('click', () => cambiarTab(tabRutina, secRutina));
 tabInfo.addEventListener('click', () => cambiarTab(tabInfo, secInfo));
 
 // Cargar Medidas
+// Cargar Medidas
 async function cargarMedidas() {
   try {
     const token = await obtenerTokenUsuario();
@@ -98,9 +99,13 @@ async function cargarMedidas() {
     const res = await fetch(`${API_URL}?sheet=usuarios&token=${encodeURIComponent(token)}`);
     const data = await res.json();
 
-    historialUsuario = data;
+    // Validamos que sea un arreglo
+    if (!Array.isArray(data) || data.length === 0) {
+      console.warn("No se encontraron medidas o el token no fue validado.");
+      return;
+    }
 
-    if (!historialUsuario || historialUsuario.length === 0) return;
+    historialUsuario = data;
 
     historialUsuario.sort((a, b) => new Date(b['Fecha Medicion'] || b['Fecha Medicion Peso']) - new Date(a['Fecha Medicion'] || a['Fecha Medicion Peso']));
 
@@ -121,10 +126,6 @@ async function cargarMedidas() {
     console.error("Error al cargar medidas:", err);
   }
 }
-
-document.getElementById('fecha-select').addEventListener('change', (e) => {
-  renderizarMedicion(historialUsuario[e.target.value]);
-});
 
 function renderizarMedicion(d) {
   document.getElementById('m-peso').textContent = d['Peso'] || '-';
