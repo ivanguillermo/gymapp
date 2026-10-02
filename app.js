@@ -8,6 +8,16 @@ import {
   signOut 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
+const API_URL = 'https://script.google.com/macros/s/AKfycbw9OxJVd4EeP5XCWFubOrWs4dAEOSDGPlG55Ize0rBiGAgFSPOcBDupxI74CMMHdeDO/exec';
+
+async function obtenerTokenUsuario() {
+  const user = auth.currentUser;
+  if (user) {
+    return await user.getIdToken();
+  }
+  return null;
+}
+
 const firebaseConfig = {
     apiKey: "AIzaSyDSNvI2PkCVkr-J3yjXy2T8rkbjujj-9AY",
     authDomain: "gymapp-4d679.firebaseapp.com",
@@ -62,19 +72,6 @@ document.getElementById('google-login-btn').addEventListener('click', async () =
 
 document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
 
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    document.getElementById('auth-section').style.display = 'none';
-    document.getElementById('dashboard-section').style.display = 'block';
-    cargarMedidas(user.email);
-    cargarRutinas(user.email);
-    cargarConfiguracionGym(); 
-  } else {
-    document.getElementById('auth-section').style.display = 'block';
-    document.getElementById('dashboard-section').style.display = 'none';
-  }
-});
-
 // Control de Pestañas Navegación
 const tabMedidas = document.getElementById('tab-btn-medidas');
 const tabRutina = document.getElementById('tab-btn-rutina');
@@ -97,33 +94,36 @@ tabRutina.addEventListener('click', () => cambiarTab(tabRutina, secRutina));
 tabInfo.addEventListener('click', () => cambiarTab(tabInfo, secInfo));
 
 // Cargar Medidas
-function cargarMedidas(userEmail) {
-  Papa.parse(SHEETS_MEDIDAS_URL, {
-    download: true,
-    header: true,
-    skipEmptyLines: true,
-    complete: function(results) {
-      historialUsuario = results.data.filter(row => row['Correo'] && row['Correo'].trim().toLowerCase() === userEmail.toLowerCase());
+async function cargarMedidas() {
+  try {
+    const token = await obtenerTokenUsuario();
+    if (!token) return;
 
-      if (historialUsuario.length === 0) return;
+    const res = await fetch(`${API_URL}?sheet=usuarios&token=${encodeURIComponent(token)}`);
+    const data = await res.json();
 
-      historialUsuario.sort((a, b) => new Date(b['Fecha Medicion'] || b['Fecha Medicion Peso']) - new Date(a['Fecha Medicion'] || a['Fecha Medicion Peso']));
+    historialUsuario = data;
 
-      document.getElementById('user-greeting').textContent = `¡Hola, ${historialUsuario[0]['Nombres']}!`;
+    if (!historialUsuario || historialUsuario.length === 0) return;
 
-      const selectFecha = document.getElementById('fecha-select');
-      selectFecha.innerHTML = '';
+    historialUsuario.sort((a, b) => new Date(b['Fecha Medicion'] || b['Fecha Medicion Peso']) - new Date(a['Fecha Medicion'] || a['Fecha Medicion Peso']));
 
-      historialUsuario.forEach((medicion, idx) => {
-        const opt = document.createElement('option');
-        opt.value = idx;
-        opt.textContent = medicion['Fecha Medicion'] || medicion['Fecha Medicion Peso'];
-        selectFecha.appendChild(opt);
-      });
+    document.getElementById('user-greeting').textContent = `¡Hola, ${historialUsuario[0]['Nombres']}!`;
 
-      renderizarMedicion(historialUsuario[0]);
-    }
-  });
+    const selectFecha = document.getElementById('fecha-select');
+    selectFecha.innerHTML = '';
+
+    historialUsuario.forEach((medicion, idx) => {
+      const opt = document.createElement('option');
+      opt.value = idx;
+      opt.textContent = medicion['Fecha Medicion'] || medicion['Fecha Medicion Peso'];
+      selectFecha.appendChild(opt);
+    });
+
+    renderizarMedicion(historialUsuario[0]);
+  } catch (err) {
+    console.error("Error al cargar medidas:", err);
+  }
 }
 
 document.getElementById('fecha-select').addEventListener('change', (e) => {
@@ -165,26 +165,28 @@ function renderizarMedicion(d) {
 }
 
 // Cargar Rutinas
-function cargarRutinas(userEmail) {
-  Papa.parse(SHEETS_RUTINAS_URL, {
-    download: true,
-    header: true,
-    skipEmptyLines: true,
-    complete: function(results) {
-      rutinaUsuarioActual = results.data.find(
-        row => row['Correo'] && row['Correo'].trim().toLowerCase() === userEmail.toLowerCase()
-      );
+async function cargarRutinas() {
+  try {
+    const token = await obtenerTokenUsuario();
+    if (!token) return;
 
-      if (rutinaUsuarioActual) {
-        const diasSemana = ['sabado', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
-        const diaHoy = diasSemana[new Date().getDay()];
-        const diaInicial = mapaColumnas[diaHoy] ? diaHoy : 'lunes';
+    const res = await fetch(`${API_URL}?sheet=rutinas&token=${encodeURIComponent(token)}`);
+    const data = await res.json();
 
-        document.getElementById('dia-rutina-select').value = diaInicial;
-        mostrarRutinaPorDia(diaInicial);
-      }
+    // Como el servidor ya filtró por correo, tomamos la primera coincidencia
+    rutinaUsuarioActual = data[0] || null;
+
+    if (rutinaUsuarioActual) {
+      const diasSemana = ['sabado', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+      const diaHoy = diasSemana[new Date().getDay()];
+      const diaInicial = mapaColumnas[diaHoy] ? diaHoy : 'lunes';
+
+      document.getElementById('dia-rutina-select').value = diaInicial;
+      mostrarRutinaPorDia(diaInicial);
     }
-  });
+  } catch (err) {
+    console.error("Error al cargar rutinas:", err);
+  }
 }
 
 document.getElementById('dia-rutina-select').addEventListener('change', (e) => {
@@ -251,37 +253,49 @@ if ('serviceWorker' in navigator) {
 const SHEETS_CONFIG_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIWPk8cl4-Tr6lJylnL-TPvEcWgfIdRW3ktWr6LlOfWO0fDhFcnkwFzkbVl0GBoUzgYFAhJFps6q9D/pub?gid=2123906384&single=true&output=csv';
 
 // Cargar Configuración del Gym (Horarios y Estado)
-function cargarConfiguracionGym() {
-  Papa.parse(SHEETS_CONFIG_URL, {
-    download: true,
-    complete: function(results) {
-      // Convertimos el CSV estilo clave-valor en un objeto JavaScript
-      const configMap = {};
-      results.data.forEach(row => {
-        if (row[0] && row[1]) {
-          configMap[row[0].trim()] = row[1].trim();
-        }
-      });
+async function cargarConfiguracionGym() {
+  try {
+    const res = await fetch(`${API_URL}?sheet=config`);
+    const data = await res.json();
 
-      // Actualizar estado ABIERTO / CERRADO
-      const statusBadge = document.getElementById('gym-status-badge');
-      const estado = (configMap['Abierto'] || '').toLowerCase();
+    const configMap = {};
+    data.forEach(row => {
+      const key = Object.keys(row)[0];
+      const val = row[key];
+      if (key) configMap[key.trim()] = val ? val.toString().trim() : '';
+    });
 
-      if (estado === 'si' || estado === 'sí') {
-        statusBadge.textContent = '🟢 ABIERTO';
-        statusBadge.className = 'status-badge status-open';
-      } else {
-        statusBadge.textContent = '🔴 CERRADO';
-        statusBadge.className = 'status-badge status-closed';
-      }
+    const statusBadge = document.getElementById('gym-status-badge');
+    const estado = (configMap['Abierto'] || '').toLowerCase();
 
-      // Actualizar horarios en la pestaña Info
-      if (configMap['Lunes a Viernes']) {
-        document.getElementById('info-horario-semana').textContent = configMap['Lunes a Viernes'];
-      }
-      if (configMap['Sabado'] || configMap['Sábado']) {
-        document.getElementById('info-horario-sabado').textContent = configMap['Sabado'] || configMap['Sábado'];
-      }
+    if (estado === 'si' || estado === 'sí') {
+      statusBadge.textContent = '🟢 ABIERTO';
+      statusBadge.className = 'status-badge status-open';
+    } else {
+      statusBadge.textContent = '🔴 CERRADO';
+      statusBadge.className = 'status-badge status-closed';
     }
-  });
+
+    if (configMap['Lunes a Viernes']) {
+      document.getElementById('info-horario-semana').textContent = configMap['Lunes a Viernes'];
+    }
+    if (configMap['Sabado'] || configMap['Sábado']) {
+      document.getElementById('info-horario-sabado').textContent = configMap['Sabado'] || configMap['Sábado'];
+    }
+  } catch (err) {
+    console.error("Error al cargar configuración:", err);
+  }
 }
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    document.getElementById('auth-section').style.display = 'none';
+    document.getElementById('dashboard-section').style.display = 'block';
+    cargarMedidas();
+    cargarRutinas();
+    cargarConfiguracionGym();
+  } else {
+    document.getElementById('auth-section').style.display = 'block';
+    document.getElementById('dashboard-section').style.display = 'none';
+  }
+});
