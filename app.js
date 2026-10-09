@@ -331,15 +331,8 @@ async function cargarConfiguracionGym() {
   if (horarioSabado) {
     document.getElementById('info-horario-sabado').textContent = horarioSabado;
   }
-
-  const avisos = configMap['Avisos'] || configMap['avisos'];
-  if (avisos) {
-    document.getElementById('info-avisos').textContent = avisos;
-  }
+  
 }
-
-
-
 onAuthStateChanged(auth, (user) => {
   if (user) {
     document.getElementById('auth-section').style.display = 'none';
