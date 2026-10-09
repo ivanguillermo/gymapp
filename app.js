@@ -5,7 +5,9 @@ import {
   GoogleAuthProvider, 
   signInWithPopup, 
   onAuthStateChanged, 
-  signOut 
+  signOut,
+  setPersistence,
+  browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 const API_URL = 'https://script.google.com/macros/s/AKfycbyTrcuZkPZkG39EAn-j51r-oMgb5EQCkHWvpYDdsX7quStSALjUN6jbSFV2U8jz8pfX/exec';
@@ -30,6 +32,10 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+setPersistence(auth, browserLocalPersistence)
+  .catch((error) => {
+    console.error("Error al configurar la persistencia de sesión:", error);
+  });
 const googleProvider = new GoogleAuthProvider();
 
 let historialUsuario = [];
