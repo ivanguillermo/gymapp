@@ -1,7 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { 
   getAuth, 
-  signInWithEmailAndPassword, 
+  signInWithEmail
+  AndPassword, 
   GoogleAuthProvider, 
   signInWithPopup, 
   onAuthStateChanged, 
@@ -330,7 +331,14 @@ async function cargarConfiguracionGym() {
   if (horarioSabado) {
     document.getElementById('info-horario-sabado').textContent = horarioSabado;
   }
+
+  const avisos = configMap['Avisos'] || configMap['avisos'];
+  if (avisos) {
+    document.getElementById('info-avisos').textContent = avisos;
+  }
 }
+
+
 
 onAuthStateChanged(auth, (user) => {
   if (user) {
