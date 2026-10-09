@@ -1,8 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { 
   getAuth, 
-  signInWithEmail,
-  AndPassword, 
+  signInWithEmailAndPassword, 
   GoogleAuthProvider, 
   signInWithPopup, 
   onAuthStateChanged, 
@@ -331,8 +330,8 @@ async function cargarConfiguracionGym() {
   if (horarioSabado) {
     document.getElementById('info-horario-sabado').textContent = horarioSabado;
   }
-  
 }
+
 onAuthStateChanged(auth, (user) => {
   if (user) {
     document.getElementById('auth-section').style.display = 'none';
