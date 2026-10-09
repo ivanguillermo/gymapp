@@ -292,7 +292,7 @@ async function cargarConfiguracionGym() {
       statusBadge.textContent = '🟢 ABIERTO';
       statusBadge.className = 'status-badge status-open';
     } else {
-      statusBadge.textContent = '🔴 CERRADO';
+      statusBadge.textContent = '🔴 ggg';
       statusBadge.className = 'status-badge status-closed';
     }
 
