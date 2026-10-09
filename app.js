@@ -285,7 +285,15 @@ async function cargarConfiguracionGym() {
     });
 
     const statusBadge = document.getElementById('gym-status-badge');
-    
+    const estado = (configMap['Abierto'] || '').toLowerCase();
+
+    if (estado === 'si' || estado === 'sí') {
+      statusBadge.textContent = '🟢 ABIERTO';
+      statusBadge.className = 'status-badge status-open';
+    } else {
+      statusBadge.textContent = '🔴 CERRADO';
+      statusBadge.className = 'status-badge status-closed';
+    }
 
     if (configMap['Lunes a Viernes']) {
       document.getElementById('info-horario-semana').textContent = configMap['Lunes a Viernes'];
