@@ -104,7 +104,19 @@ async function cargarMedidas() {
       return;
     }
 
-    historialUsuario = data;
+    if (Array.isArray(data) && data.length > 0) {
+        historialUsuario = data;
+        // Guardamos una copia en el navegador para cuando no haya internet
+        localStorage.setItem('topofit_medidas', JSON.stringify(data));
+      }
+    } catch (err) {
+      console.warn("Sin conexión a internet. Cargando medidas locales...", err);
+      // Si falla por falta de internet, buscamos en el almacenamiento local
+      const datosGuardados = localStorage.getItem('topofit_medidas');
+      if (datosGuardados) {
+        historialUsuario = JSON.parse(datosGuardados);
+      }
+    }
 
     historialUsuario.sort((a, b) => new Date(b['Fecha Medicion'] || b['Fecha Medicion Peso']) - new Date(a['Fecha Medicion'] || a['Fecha Medicion Peso']));
 
@@ -196,7 +208,17 @@ async function cargarRutinas() {
     const data = await res.json();
 
     // Como el servidor ya filtró por correo, tomamos la primera coincidencia
-    rutinaUsuarioActual = data[0] || null;
+    rutinaUsuarioActual = data[0] || null;    
+    if (rutinaUsuarioActual) {
+        localStorage.setItem('topofit_rutina', JSON.stringify(rutinaUsuarioActual));
+      }
+    } catch (err) {
+      console.warn("Sin conexión. Cargando rutina local...", err);
+      const rutinaGuardada = localStorage.getItem('topofit_rutina');
+      if (rutinaGuardada) {
+        rutinaUsuarioActual = JSON.parse(rutinaGuardada);
+      }
+    }
 
     if (rutinaUsuarioActual) {
       const diasSemana = ['sabado', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
@@ -283,6 +305,16 @@ async function cargarConfiguracionGym() {
       const val = row[keys[1]];
       if (key) configMap[key.toString().trim()] = val ? val.toString().trim() : '';
     });
+
+    localStorage.setItem('topofit_config', JSON.stringify(configMap));
+  } catch (err) {
+    console.warn("Sin conexión. Cargando configuración local...", err);
+    const configGuardada = localStorage.getItem('topofit_config');
+    if (configGuardada) {
+      configMap = JSON.parse(configGuardada);
+    }
+  }
+    
 
     const statusBadge = document.getElementById('gym-status-badge');
     const estado = (configMap['Abierto'] || '').toLowerCase();
