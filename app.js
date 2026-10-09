@@ -90,7 +90,6 @@ tabRutina.addEventListener('click', () => cambiarTab(tabRutina, secRutina));
 tabInfo.addEventListener('click', () => cambiarTab(tabInfo, secInfo));
 
 // Cargar Medidas
-// Cargar Medidas
 async function cargarMedidas() {
   try {
     const token = await obtenerTokenUsuario();
@@ -117,7 +116,29 @@ async function cargarMedidas() {
     historialUsuario.forEach((medicion, idx) => {
       const opt = document.createElement('option');
       opt.value = idx;
-      opt.textContent = medicion['Fecha Medicion'] || medicion['Fecha Medicion Peso'];
+      
+      // Obtenemos la fecha cruda de la celda
+      const fechaBruta = medicion['Fecha Medicion'] || medicion['Fecha Medicion Peso'];
+      
+      if (fechaBruta) {
+        // Convertimos el texto a un objeto Date (reemplazando guiones por barras ayuda a evitar problemas de zona horaria)
+        const fechaObj = new Date(fechaBruta.replace(/-/g, '\/'));
+        
+        if (!isNaN(fechaObj)) {
+          // Formateamos: Ej. "12 oct. 2026"
+          opt.textContent = fechaObj.toLocaleDateString('es-ES', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+          });
+        } else {
+          // Si por alguna razón el formato no se deja parsear, mostramos el original sin la hora si tuviera
+          opt.textContent = fechaBruta.split('T')[0];
+        }
+      } else {
+        opt.textContent = `Medición ${idx + 1}`;
+      }
+
       selectFecha.appendChild(opt);
     });
 
