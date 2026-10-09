@@ -125,6 +125,10 @@ async function cargarMedidas() {
   } catch (err) {
     console.error("Error al cargar medidas:", err);
   }
+    document.getElementById('fecha-select').addEventListener('change', (e) => {
+    const index = e.target.value;
+    renderizarMedicion(historialUsuario[index]);
+  });
 }
 
 function renderizarMedicion(d) {
