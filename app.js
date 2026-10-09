@@ -104,73 +104,65 @@ async function cargarMedidas() {
     const res = await fetch(`${API_URL}?sheet=usuarios&token=${encodeURIComponent(token)}`);
     const data = await res.json();
 
-    // Validamos que sea un arreglo
-    if (!Array.isArray(data) || data.length === 0) {
-      console.warn("No se encontraron medidas o el token no fue validado.");
-      return;
-    }
-
     if (Array.isArray(data) && data.length > 0) {
-        historialUsuario = data;
-        // Guardamos una copia en el navegador para cuando no haya internet
-        localStorage.setItem('topofit_medidas', JSON.stringify(data));
+      historialUsuario = data;
+      localStorage.setItem('topofit_medidas', JSON.stringify(data));
+    }
+  } catch (err) {
+    console.warn("Sin conexión a internet. Cargando medidas locales...", err);
+    const datosGuardados = localStorage.getItem('topofit_medidas');
+    if (datosGuardados) {
+      historialUsuario = JSON.parse(datosGuardados);
+    }
+  }
+
+  if (!Array.isArray(historialUsuario) || historialUsuario.length === 0) {
+    console.warn("No se encontraron medidas disponibles.");
+    return;
+  }
+
+  historialUsuario.sort((a, b) => new Date(b['Fecha Medicion'] || b['Fecha Medicion Peso']) - new Date(a['Fecha Medicion'] || a['Fecha Medicion Peso']));
+
+  document.getElementById('user-greeting').textContent = `¡Hola, ${historialUsuario[0]['Nombres'] || 'Atleta'}!`;
+
+  const selectFecha = document.getElementById('fecha-select');
+  selectFecha.innerHTML = '';
+
+  historialUsuario.forEach((medicion, idx) => {
+    const opt = document.createElement('option');
+    opt.value = idx;
+    
+    const fechaBruta = medicion['Fecha Medicion'] || medicion['Fecha Medicion Peso'];
+    
+    if (fechaBruta) {
+      const fechaObj = new Date(fechaBruta.replace(/-/g, '/'));
+      if (!isNaN(fechaObj)) {
+        opt.textContent = fechaObj.toLocaleDateString('es-ES', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        });
+      } else {
+        opt.textContent = fechaBruta.split('T')[0];
       }
-    } catch (err) {
-      console.warn("Sin conexión a internet. Cargando medidas locales...", err);
-      // Si falla por falta de internet, buscamos en el almacenamiento local
-      const datosGuardados = localStorage.getItem('topofit_medidas');
-      if (datosGuardados) {
-        historialUsuario = JSON.parse(datosGuardados);
-      }
+    } else {
+      opt.textContent = `Medición ${idx + 1}`;
     }
 
-    historialUsuario.sort((a, b) => new Date(b['Fecha Medicion'] || b['Fecha Medicion Peso']) - new Date(a['Fecha Medicion'] || a['Fecha Medicion Peso']));
-
-    document.getElementById('user-greeting').textContent = `¡Hola, ${historialUsuario[0]['Nombres']}!`;
-
-    const selectFecha = document.getElementById('fecha-select');
-    selectFecha.innerHTML = '';
-
-    historialUsuario.forEach((medicion, idx) => {
-      const opt = document.createElement('option');
-      opt.value = idx;
-      
-      // Obtenemos la fecha cruda de la celda
-      const fechaBruta = medicion['Fecha Medicion'] || medicion['Fecha Medicion Peso'];
-      
-      if (fechaBruta) {
-        // Convertimos el texto a un objeto Date (reemplazando guiones por barras ayuda a evitar problemas de zona horaria)
-        const fechaObj = new Date(fechaBruta.replace(/-/g, '\/'));
-        
-        if (!isNaN(fechaObj)) {
-          // Formateamos: Ej. "12 oct. 2026"
-          opt.textContent = fechaObj.toLocaleDateString('es-ES', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-          });
-        } else {
-          // Si por alguna razón el formato no se deja parsear, mostramos el original sin la hora si tuviera
-          opt.textContent = fechaBruta.split('T')[0];
-        }
-      } else {
-        opt.textContent = `Medición ${idx + 1}`;
-      }
-
-      selectFecha.appendChild(opt);
-    });
-
-    renderizarMedicion(historialUsuario[0]);
-  } catch (err) {
-    console.error("Error al cargar medidas:", err);
-  }
-    document.getElementById('fecha-select').addEventListener('change', (e) => {
-    const index = e.target.value;
-    renderizarMedicion(historialUsuario[index]);
+    selectFecha.appendChild(opt);
   });
+
+  renderizarMedicion(historialUsuario[0]);
 }
 
+// Escuchador del selector de fechas (fuera de la función para que no se duplique)
+document.getElementById('fecha-select').addEventListener('change', (e) => {
+  const index = e.target.value;
+  renderizarMedicion(historialUsuario[index]);
+});
+
 function renderizarMedicion(d) {
+  if (!d) return;
   document.getElementById('m-peso').textContent = d['Peso'] || '-';
   document.getElementById('m-grasa-corp').textContent = d['Grasa Corporal'] || '-';
   document.getElementById('m-masa-corp').textContent = d['Masa Corporal'] || '-';
@@ -213,29 +205,25 @@ async function cargarRutinas() {
     const res = await fetch(`${API_URL}?sheet=rutinas&token=${encodeURIComponent(token)}`);
     const data = await res.json();
 
-    // Como el servidor ya filtró por correo, tomamos la primera coincidencia
     rutinaUsuarioActual = data[0] || null;    
     if (rutinaUsuarioActual) {
-        localStorage.setItem('topofit_rutina', JSON.stringify(rutinaUsuarioActual));
-      }
-    } catch (err) {
-      console.warn("Sin conexión. Cargando rutina local...", err);
-      const rutinaGuardada = localStorage.getItem('topofit_rutina');
-      if (rutinaGuardada) {
-        rutinaUsuarioActual = JSON.parse(rutinaGuardada);
-      }
-    }
-
-    if (rutinaUsuarioActual) {
-      const diasSemana = ['sabado', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
-      const diaHoy = diasSemana[new Date().getDay()];
-      const diaInicial = mapaColumnas[diaHoy] ? diaHoy : 'lunes';
-
-      document.getElementById('dia-rutina-select').value = diaInicial;
-      mostrarRutinaPorDia(diaInicial);
+      localStorage.setItem('topofit_rutina', JSON.stringify(rutinaUsuarioActual));
     }
   } catch (err) {
-    console.error("Error al cargar rutinas:", err);
+    console.warn("Sin conexión. Cargando rutina local...", err);
+    const rutinaGuardada = localStorage.getItem('topofit_rutina');
+    if (rutinaGuardada) {
+      rutinaUsuarioActual = JSON.parse(rutinaGuardada);
+    }
+  }
+
+  if (rutinaUsuarioActual) {
+    const diasSemana = ['sabado', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+    const diaHoy = diasSemana[new Date().getDay()];
+    const diaInicial = mapaColumnas[diaHoy] ? diaHoy : 'lunes';
+
+    document.getElementById('dia-rutina-select').value = diaInicial;
+    mostrarRutinaPorDia(diaInicial);
   }
 }
 
@@ -299,12 +287,14 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+// Cargar Configuración del Gym
 async function cargarConfiguracionGym() {
+  let configMap = {};
+
   try {
     const res = await fetch(`${API_URL}?sheet=config`);
     const data = await res.json();
 
-    const configMap = {};
     data.forEach(row => {
       const keys = Object.keys(row);
       const key = row[keys[0]];
@@ -320,32 +310,25 @@ async function cargarConfiguracionGym() {
       configMap = JSON.parse(configGuardada);
     }
   }
-    
 
-    const statusBadge = document.getElementById('gym-status-badge');
-    const estado = (configMap['Abierto'] || '').toLowerCase();
+  const statusBadge = document.getElementById('gym-status-badge');
+  const estado = (configMap['Abierto'] || '').toLowerCase();
 
-    if (estado === 'si' || estado === 'sí') {
-      statusBadge.textContent = '🟢 ABIERTO';
-      statusBadge.className = 'status-badge status-open';
-    } else {
-      statusBadge.textContent = '🔴 CERRADO';
-      statusBadge.className = 'status-badge status-closed';
-    }
+  if (estado === 'si' || estado === 'sí') {
+    statusBadge.textContent = '🟢 ABIERTO';
+    statusBadge.className = 'status-badge status-open';
+  } else {
+    statusBadge.textContent = '🔴 CERRADO';
+    statusBadge.className = 'status-badge status-closed';
+  }
 
-    if (configMap['Lunes a Viernes']) {
-      document.getElementById('info-horario-semana').textContent = configMap['Lunes a Viernes'];
-    }
-    // Maneja tanto "Sabado" como "Sábado" de manera segura
-    const horarioSabado = configMap['Sabado'] || configMap['Sábado'];
-    if (horarioSabado) {
-      document.getElementById('info-horario-sabado').textContent = horarioSabado;
-    }
-  } catch (err) {
-    console.error("Error al cargar configuración:", err);
-    // Si hay un error de red, dejamos al menos un estado neutro o el último conocido
-    const statusBadge = document.getElementById('gym-status-badge');
-    statusBadge.textContent = '⚠️ SIN CONEXIÓN';
+  if (configMap['Lunes a Viernes']) {
+    document.getElementById('info-horario-semana').textContent = configMap['Lunes a Viernes'];
+  }
+  
+  const horarioSabado = configMap['Sabado'] || configMap['Sábado'];
+  if (horarioSabado) {
+    document.getElementById('info-horario-sabado').textContent = horarioSabado;
   }
 }
 
