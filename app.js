@@ -285,16 +285,7 @@ async function cargarConfiguracionGym() {
     });
 
     const statusBadge = document.getElementById('gym-status-badge');
-    const estado = configMap['Abierto'];
-
-    // Comprobamos explícitamente si dice sí o si
-    if (estado === '1') {
-      statusBadge.textContent = '🟢 ABIERTO';
-      statusBadge.className = 'status-badge status-open';
-    } else {
-      statusBadge.textContent = '🔴 ggg';
-      statusBadge.className = 'status-badge status-closed';
-    }
+    
 
     if (configMap['Lunes a Viernes']) {
       document.getElementById('info-horario-semana').textContent = configMap['Lunes a Viernes'];
