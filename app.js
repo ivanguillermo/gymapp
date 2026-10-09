@@ -288,7 +288,7 @@ async function cargarConfiguracionGym() {
     const estado = (configMap['Abierto'] || '').toLowerCase();
 
     // Comprobamos explícitamente si dice sí o si
-    if (estado === 'si' || estado === 'sí') {
+    if (estado === '' || estado === '2') {
       statusBadge.textContent = '🟢 ABIERTO';
       statusBadge.className = 'status-badge status-open';
     } else {
