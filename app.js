@@ -322,8 +322,8 @@ async function cargarConfiguracionGym() {
     statusBadge.className = 'status-badge status-closed';
   }
 
-  if (configMap['Lunes a Viernes']) {
-    document.getElementById('info-horario-semana').textContent = configMap['Lunes a Viernes'];
+  if (configMap['avisos']) {
+    document.getElementById('info-avisos').textContent = configMap['avisos'];
   }  
   
   const horarioSabado = configMap['Sabado'] || configMap['Sábado'];
