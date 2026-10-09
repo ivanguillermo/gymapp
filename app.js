@@ -285,10 +285,10 @@ async function cargarConfiguracionGym() {
     });
 
     const statusBadge = document.getElementById('gym-status-badge');
-    const estado = (configMap['Abierto'] || '').toLowerCase();
+    const estado = configMap['Abierto'];
 
     // Comprobamos explícitamente si dice sí o si
-    if (estado === '1' || estado === '2') {
+    if (estado === '1') {
       statusBadge.textContent = '🟢 ABIERTO';
       statusBadge.className = 'status-badge status-open';
     } else {
