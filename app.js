@@ -250,8 +250,6 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-
-// Cargar Configuración del Gym (Horarios y Estado)
 async function cargarConfiguracionGym() {
   try {
     const res = await fetch(`${API_URL}?sheet=config`);
@@ -259,7 +257,6 @@ async function cargarConfiguracionGym() {
 
     const configMap = {};
     data.forEach(row => {
-      // Extrae la primera y segunda columna independientemente del nombre de las cabeceras
       const keys = Object.keys(row);
       const key = row[keys[0]];
       const val = row[keys[1]];
@@ -269,6 +266,7 @@ async function cargarConfiguracionGym() {
     const statusBadge = document.getElementById('gym-status-badge');
     const estado = (configMap['Abierto'] || '').toLowerCase();
 
+    // Comprobamos explícitamente si dice sí o si
     if (estado === 'si' || estado === 'sí') {
       statusBadge.textContent = '🟢 ABIERTO';
       statusBadge.className = 'status-badge status-open';
@@ -280,11 +278,16 @@ async function cargarConfiguracionGym() {
     if (configMap['Lunes a Viernes']) {
       document.getElementById('info-horario-semana').textContent = configMap['Lunes a Viernes'];
     }
-    if (configMap['Sabado'] || configMap['Sábado']) {
-      document.getElementById('info-horario-sabado').textContent = configMap['Sabado'] || configMap['Sábado'];
+    // Maneja tanto "Sabado" como "Sábado" de manera segura
+    const horarioSabado = configMap['Sabado'] || configMap['Sábado'];
+    if (horarioSabado) {
+      document.getElementById('info-horario-sabado').textContent = horarioSabado;
     }
   } catch (err) {
     console.error("Error al cargar configuración:", err);
+    // Si hay un error de red, dejamos al menos un estado neutro o el último conocido
+    const statusBadge = document.getElementById('gym-status-badge');
+    statusBadge.textContent = '⚠️ SIN CONEXIÓN';
   }
 }
 
