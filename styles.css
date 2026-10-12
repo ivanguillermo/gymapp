@@ -182,7 +182,7 @@ button:hover {
 }
 
 .metric-card {
-  background: var(--accent-purple);
+  background: var(--subcard-bg);
   padding: 10px 12px;
   border-radius: 8px;
   border-left: 3px solid var(--primary-green);
