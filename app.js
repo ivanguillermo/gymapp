@@ -322,10 +322,12 @@ async function cargarConfiguracionGym() {
     statusBadge.className = 'status-badge status-closed';
   }
 
-  if (configMap['Lunes a Viernes']) {
-    document.getElementById('info-horario-semana').textContent = configMap['Lunes a Viernes'];
+  if (configMap['Mañana']) {
+    document.getElementById('info-horario-morning').textContent = configMap['Mañana'];
   }
-
+  if (configMap['Tarde']) {
+    document.getElementById('info-horario-tarde').textContent = configMap['Tarde'];
+  }
   if (configMap['avisos']) {
     document.getElementById('info-avisos').textContent = configMap['avisos'];
   }  
